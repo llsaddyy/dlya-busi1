@@ -516,7 +516,7 @@
             transform: scale(1.05);
         }
 
-        /* СЛАЙДЕР - увеличенная высота */
+        /* СЛАЙДЕР */
         .slider-section {
             margin: 60px 0;
             padding: 20px;
@@ -546,10 +546,10 @@
 
         .slide img {
             width: 100%;
-            height: 600px; /* Увеличил высоту */
-            object-fit: contain; /* Изменил на contain чтобы было видно целиком */
+            height: 600px;
+            object-fit: contain;
             display: block;
-            background: #ffe4ec; /* Фон для пустых мест */
+            background: #ffe4ec;
         }
 
         .slider-btn {
@@ -633,7 +633,7 @@
             transform: scale(1.1);
         }
 
-        /* Пасхалки в углах - теперь кликабельные */
+        /* Пасхалки в углах */
         .easter-egg-left {
             position: fixed;
             bottom: 10px;
@@ -691,71 +691,17 @@
         <button class="popup-close" id="closePopup">Закрыть 💕</button>
     </div>
 
-    <!-- Музыка (теперь аудиофайл) -->
+    <!-- Музыкальный плеер -->
     <div class="music-player">
         <button class="music-btn" id="musicToggle">
-            <span>🔊</span> <span id="musicText">Выключить музыку</span>
+            <span>🔈</span> <span id="musicText">Включить музыку</span>
         </button>
     </div>
     
-<script>
-    // ==================== МУЗЫКА С АВТОПЛЕЙ ====================
-    const musicToggle = document.getElementById('musicToggle');
-    const musicText = document.getElementById('musicText');
-    const audio = document.getElementById('bgMusic');
-    let isPlaying = false; // Начинаем с выключенной, но сразу пытаемся включить
-
-    // Функция попытки включить музыку
-    function tryPlayMusic() {
-        audio.play()
-            .then(() => {
-                isPlaying = true;
-                musicText.textContent = 'Выключить музыку';
-                musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
-                console.log('Музыка играет');
-            })
-            .catch(error => {
-                console.log('Автоплей заблокирован браузером, ждем действия пользователя');
-                // Оставляем кнопку в состоянии "Включить"
-                musicText.textContent = 'Включить музыку';
-                musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
-            });
-    }
-
-    // Пытаемся включить сразу после загрузки страницы
-    window.addEventListener('load', () => {
-        tryPlayMusic();
-    });
-
-    // Также пробуем включить при первом клике в любом месте (если автоплей не сработал)
-    document.body.addEventListener('click', function enableMusic() {
-        if (!isPlaying) {
-            tryPlayMusic();
-        }
-    }, { once: true }); // Сработает только один раз
-
-    // Кнопка ручного управления
-    musicToggle.addEventListener('click', (e) => {
-        e.stopPropagation(); // Чтобы не сработал body клик
-        
-        if (isPlaying) {
-            audio.pause();
-            musicText.textContent = 'Включить музыку';
-            musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
-            isPlaying = false;
-        } else {
-            audio.play()
-                .then(() => {
-                    musicText.textContent = 'Выключить музыку';
-                    musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
-                    isPlaying = true;
-                })
-                .catch(err => {
-                    alert('Нажми куда-нибудь на странице, чтобы включить музыку');
-                });
-        }
-    });
-</script>
+    <!-- Аудио -->
+    <audio id="bgMusic" loop style="display: none;">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
 
     <!-- ШАПКА -->
     <div class="container">
@@ -817,7 +763,7 @@
             </div>
         </div>
 
-        <!-- СЛАЙДЕР С ФОТО (валентинки из интернета) -->
+        <!-- СЛАЙДЕР С ФОТО -->
         <div class="slider-section">
             <h2 class="section-title">📸 Валентинки для тебя 📸</h2>
             <div class="slider-container">
@@ -874,36 +820,65 @@
         </div>
     </div>
 
-    <!-- Пасхалки в углах (теперь кликабельные) -->
+    <!-- Пасхалки в углах -->
     <div class="easter-egg-left" id="footballEgg">⚽</div>
     <div class="easter-egg-right" id="crownEgg">👑</div>
 
     <script>
-        // ==================== МУЗЫКА (АУДИО) ====================
+        // ==================== МУЗЫКА С АВТОПЛЕЙ ====================
         const musicToggle = document.getElementById('musicToggle');
         const musicText = document.getElementById('musicText');
         const audio = document.getElementById('bgMusic');
-        let isPlaying = true;
+        let isPlaying = false;
 
-        // Пытаемся включить автоплей
-        audio.play().catch(() => {
-            // Если автоплей заблокирован, показываем кнопку включения
-            isPlaying = false;
-            musicText.textContent = 'Включить музыку';
-            musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+        // Функция попытки включить музыку
+        function tryPlayMusic() {
+            audio.play()
+                .then(() => {
+                    isPlaying = true;
+                    musicText.textContent = 'Выключить музыку';
+                    musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
+                    console.log('Музыка играет');
+                })
+                .catch(error => {
+                    console.log('Автоплей заблокирован браузером, ждем действия пользователя');
+                    musicText.textContent = 'Включить музыку';
+                    musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+                });
+        }
+
+        // Пытаемся включить сразу после загрузки страницы
+        window.addEventListener('load', () => {
+            tryPlayMusic();
         });
 
-        musicToggle.addEventListener('click', () => {
+        // При первом клике в любом месте тоже пробуем включить
+        document.body.addEventListener('click', function enableMusic() {
+            if (!isPlaying) {
+                tryPlayMusic();
+            }
+        }, { once: true });
+
+        // Кнопка ручного управления
+        musicToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
             if (isPlaying) {
                 audio.pause();
                 musicText.textContent = 'Включить музыку';
                 musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+                isPlaying = false;
             } else {
-                audio.play();
-                musicText.textContent = 'Выключить музыку';
-                musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
+                audio.play()
+                    .then(() => {
+                        musicText.textContent = 'Выключить музыку';
+                        musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
+                        isPlaying = true;
+                    })
+                    .catch(err => {
+                        alert('Нажми куда-нибудь на странице, чтобы включить музыку');
+                    });
             }
-            isPlaying = !isPlaying;
         });
 
         // ==================== ПОПАП ====================
@@ -1149,7 +1124,6 @@
         const dotsContainer = document.getElementById('dots');
         let currentSlide = 0;
 
-        // Создаем точки под слайды
         slides.forEach((_, index) => {
             const dot = document.createElement('span');
             dot.className = `dot ${index === 0 ? 'active' : ''}`;
@@ -1179,7 +1153,6 @@
             updateSlider();
         });
 
-        // Замедлил автопрокрутку до 5 секунд
         setInterval(() => {
             currentSlide = (currentSlide + 1) % slides.length;
             updateSlider();

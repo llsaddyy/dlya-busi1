@@ -75,6 +75,7 @@
             text-shadow: 3px 3px 10px rgba(255, 77, 109, 0.3);
             display: inline-block;
             font-family: 'Montserrat Alternates', sans-serif;
+            cursor: pointer;
         }
 
         .heart-big {
@@ -130,6 +131,50 @@
             color: #ff4d6d;
         }
 
+        /* ПОПАП ДЛЯ ПАСХАЛОК */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(255, 107, 139, 0.5);
+            z-index: 10000;
+            transition: all 0.3s ease;
+            border: 3px solid #ffb6c1;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .popup-content {
+            font-size: 20px;
+            color: #ff6b8b;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .popup-close {
+            background: #ffb6c1;
+            border: none;
+            padding: 10px 30px;
+            font-size: 16px;
+            font-family: 'Comfortaa', cursive;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+        }
+
+        .popup-close:hover {
+            background: #ff8da1;
+        }
+
         /* ПОЗДРАВЛЕНИЕ */
         .greeting {
             background: rgba(255, 255, 255, 0.7);
@@ -167,6 +212,7 @@
             display: flex;
             justify-content: center;
             margin: 60px 0;
+            position: relative;
         }
 
         .envelope {
@@ -215,6 +261,27 @@
             opacity: 0;
         }
 
+        .envelope-hint {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+            color: #ff6b8b;
+            border: 2px solid #ffb6c1;
+            white-space: nowrap;
+            box-shadow: 0 5px 10px rgba(255,107,139,0.2);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
         .valentine-card {
             position: absolute;
             top: 50%;
@@ -235,15 +302,23 @@
             transform: translate(-50%, -70%) scale(1);
         }
 
-        .valentine-card img {
-            width: 100%;
-            border-radius: 15px;
-            margin-bottom: 10px;
-        }
-
         .valentine-card p {
             color: #ff6b8b;
             font-weight: 600;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .secret-placeholder {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(145deg, #ffe4e9, #ffd5e0);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff6b8b;
+            font-size: 40px;
         }
 
         /* ГАДАЛКА */
@@ -365,7 +440,7 @@
             justify-content: center;
         }
 
-        /* НОВАЯ ИГРА: НАЙДИ ПАРУ */
+        /* ИГРА: НАЙДИ ПАРУ */
         .game-section {
             background: #ffe4ec;
             border-radius: 40px;
@@ -478,23 +553,9 @@
 
         .slide img {
             width: 100%;
-            height: 400px;
+            height: 500px;
             object-fit: cover;
             display: block;
-        }
-
-        .slide-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            text-align: center;
-            font-weight: 600;
-            color: #ff6b8b;
-            backdrop-filter: blur(5px);
-            border-top: 2px solid #ffb6c1;
         }
 
         .slider-btn {
@@ -546,18 +607,35 @@
             transform: scale(1.3);
         }
 
-        /* ФУТЕР */
+        /* ФУТЕР С ПАСХАЛКАМИ */
         .footer {
             text-align: center;
             padding: 30px;
             background: rgba(255, 182, 193, 0.3);
             margin-top: 60px;
             border-radius: 40px 40px 0 0;
+            position: relative;
         }
 
         .hearts-line {
             font-size: 24px;
             margin-bottom: 10px;
+        }
+
+        .secret-link {
+            font-size: 12px;
+            color: #ffb6c1;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+            display: inline-block;
+        }
+
+        .secret-link:hover {
+            color: #ff6b8b;
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         @keyframes fadeIn {
@@ -578,6 +656,12 @@
 </head>
 <body>
 
+    <!-- Попап для пасхалок -->
+    <div class="popup" id="secretPopup">
+        <div class="popup-content" id="popupContent"></div>
+        <button class="popup-close" id="closePopup">Закрыть 💕</button>
+    </div>
+
     <!-- Музыка -->
     <div class="music-player">
         <button class="music-btn" id="musicToggle">
@@ -595,7 +679,7 @@
         <div class="header">
             <h1 class="main-title">
                 <span class="for">Для</span>
-                <span class="name">Буси</span>
+                <span class="name" id="secretClickTarget">Буси</span>
                 <span class="heart-big">❤️</span>
             </h1>
             <div class="subtitle">от твоего Пупса</div>
@@ -614,10 +698,11 @@
             <div class="envelope" id="envelope">
                 <div class="heart-on">💌</div>
                 <div class="valentine-card">
-                    <img src="https://i.pinimg.com/736x/9b/dd/a0/9bdda07b6889922dd3ded440008e4c71.jpg" alt="Валентинка">
-                    <p>Для моего Семенчика ❤️</p>
+                    <div class="secret-placeholder">❤️</div>
+                    <p>Для моего Семенчика</p>
                 </div>
             </div>
+            <div class="envelope-hint">💕 нажми на конверт 💕</div>
         </div>
 
         <!-- ГАДАЛКА "Погадай, Семенчик!" -->
@@ -639,7 +724,7 @@
             </div>
         </div>
 
-        <!-- НОВАЯ ИГРА: НАЙДИ ПАРУ -->
+        <!-- ИГРА: НАЙДИ ПАРУ -->
         <div class="game-section">
             <h2 class="section-title">🎮 Найди пару для Буси! 🎮</h2>
             <div class="game-container">
@@ -649,61 +734,75 @@
             </div>
         </div>
 
-        <!-- СЛАЙДЕР С ФОТО -->
+        <!-- СЛАЙДЕР С ФОТО (валентинки из интернета) -->
         <div class="slider-section">
-            <h2 class="section-title">📸 Наши моменты 📸</h2>
+            <h2 class="section-title">📸 Валентинки для тебя 📸</h2>
             <div class="slider-container">
                 <div class="slider" id="slider">
                     <div class="slide">
-                        <img src="https://via.placeholder.com/600x400/ffb6c1/ffffff?text=Тут+будет+наше+фото+1" alt="Фото 1">
-                        <div class="slide-caption">Наше первое фото 💕 (замени на свое)</div>
+                        <img src="https://i.pinimg.com/736x/09/a5/b9/09a5b951db991ad1f1d28f68716e2446.jpg" alt="Валентинка">
                     </div>
                     <div class="slide">
-                        <img src="https://via.placeholder.com/600x400/ff8da1/ffffff?text=Тут+будет+наше+фото+2" alt="Фото 2">
-                        <div class="slide-caption">Как мы мило обнимаемся 🥰</div>
+                        <img src="https://i.pinimg.com/736x/4c/87/81/4c8781510d78c687d2d98ac557a690a2.jpg" alt="Валентинка">
                     </div>
                     <div class="slide">
-                        <img src="https://via.placeholder.com/600x400/ff9ebb/ffffff?text=Тут+будет+наше+фото+3" alt="Фото 3">
-                        <div class="slide-caption">Мой любимый Буся ❤️</div>
+                        <img src="https://i.pinimg.com/736x/24/71/86/247186d502bda81950155b7069887b00.jpg" alt="Валентинка">
                     </div>
                     <div class="slide">
-                        <img src="https://via.placeholder.com/600x400/ffafc0/ffffff?text=Тут+будет+наше+фото+4" alt="Фото 4">
-                        <div class="slide-caption">С тобой каждый день праздник ✨</div>
+                        <img src="https://i.pinimg.com/736x/f0/66/7e/f0667e04e3dc02a68927c4833c324520.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/1200x/24/bc/b2/24bcb2155b7a70f3047dfa4f1a49e1f3.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/736x/10/50/b1/1050b1e4bd00f509b314699a2a9fe83b.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/736x/f4/6b/fa/f46bfa634c512871c976980afb3d28d4.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/1200x/5c/d0/2f/5cd02fc12ba1c072c364c42ec7cb4aef.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/736x/b9/79/ec/b979ec3952e734a542137259ac949432.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/736x/47/00/bd/4700bdd8eaa2be851a558e85ca1e8331.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/1200x/01/ec/ca/01ecca7ddcf0341d7ca0e432a3231dbb.jpg" alt="Валентинка">
+                    </div>
+                    <div class="slide">
+                        <img src="https://i.pinimg.com/736x/17/36/1e/17361e448bd9c693a1bd849ef17fdb2c.jpg" alt="Валентинка">
                     </div>
                 </div>
                 <button class="slider-btn prev" id="prevSlide">❮</button>
                 <button class="slider-btn next" id="nextSlide">❯</button>
             </div>
-            <div class="dots" id="dots">
-                <span class="dot active"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-            </div>
+            <div class="dots" id="dots"></div>
         </div>
 
-        <!-- ФУТЕР -->
-        <div class="footer">
+        <!-- ФУТЕР С ПАСХАЛКАМИ -->
+        <div class="footer" id="footer">
             <div class="hearts-line">❤️ 🧡 💛 💚 💙 💜 🖤</div>
             <p>Сделано с любовью для Буси от Пупса 💕 14 февраля</p>
+            <!-- ПАСХАЛКА 1: Секретная кнопка -->
+            <div class="secret-link" id="secretButton">не нажимай</div>
         </div>
     </div>
 
     <script>
-        // ==================== МУЗЫКА (ИСПРАВЛЕНО) ====================
+        // ==================== МУЗЫКА ====================
         const musicToggle = document.getElementById('musicToggle');
         const musicText = document.getElementById('musicText');
         const player = document.getElementById('youtubePlayer');
         let isPlaying = true;
 
-        // Пробуем включить автоплей
-        window.addEventListener('load', () => {
-            // YouTube iframe API
-            const tag = document.createElement('script');
-            tag.src = 'https://www.youtube.com/iframe_api';
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        });
+        // YouTube iframe API
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         let ytPlayer;
         window.onYouTubeIframeAPIReady = function() {
@@ -715,7 +814,7 @@
         };
 
         function onPlayerReady(event) {
-            event.target.playVideo(); // Автоплей
+            event.target.playVideo();
         }
 
         musicToggle.addEventListener('click', () => {
@@ -733,6 +832,20 @@
             }
         });
 
+        // ==================== ПОПАП ====================
+        const popup = document.getElementById('secretPopup');
+        const popupContent = document.getElementById('popupContent');
+        const closePopup = document.getElementById('closePopup');
+
+        function showPopup(message) {
+            popupContent.textContent = message;
+            popup.classList.add('show');
+        }
+
+        closePopup.addEventListener('click', () => {
+            popup.classList.remove('show');
+        });
+
         // ==================== КОНВЕРТ ====================
         const envelope = document.getElementById('envelope');
         envelope.addEventListener('click', () => {
@@ -747,7 +860,7 @@
         const tarotCards = [
             { name: "Влюбленные (The Lovers)", text: "Сегодня ты встретишь свою любовь. Ой, подожди, ты уже встретил. Это я! ❤️" },
             { name: "Шут (The Fool)", text: "Ты дурак, если думаешь, что я тебя не люблю. Люблю бесконечно! 🤪" },
-            { name: "Колесо Фортуны", text: "Тебе сегодня повезет: Пупс позвонит первой и скажет что-то очень нежное 🎰" },
+            { name: "Колесо Фортуны", text: "Тебе сегодня повезет: Пупс позвонит и скажет что-то очень нежное 🎰" },
             { name: "Императрица", text: "Жди сюрприз. Возможно, вкусный. Очень вкусный. Спойлер: это торт 🍰" },
             { name: "Маг", text: "Ты можешь всё! Даже заставить мое сердце биться чаще одним сообщением ✨" },
             { name: "Жрица", text: "Я знаю секрет. Но не скажу. Хотя... Ты самый лучший! 🤫" },
@@ -784,20 +897,20 @@
             "За твои глаза (они бездонные)",
             "За то, как ты говоришь 'Пупс'",
             "За твои обнимашки на расстоянии",
-            "За то, что ты болеешь за Барселону (я всё равно не понимаю, но ради тебя готова)",
+            "За то, что ты болеешь за Барселону",
             "За то, что ты мой личный Месси",
-            "За твои глупые шутки (они самые смешные)",
+            "За твои глупые шутки",
             "За то, что ты помнишь все мелочи",
             "За твою любовь к аниме",
             "За то, как ты заботишься обо мне",
             "За твой голос по телефону",
             "За то, что ты существуешь",
-            "За твои руки (хочу их держать)",
+            "За твои руки",
             "За то, что ты мой принц",
             "За то, как ты читаешь мне сказки",
             "За твою поддержку",
             "За то, что с тобой я чувствую себя особенной",
-            "За твой смех (заразительный)",
+            "За твой смех",
             "За то, что ты есть у меня",
             "За то, как ты смотришь на меня",
             "За твои сообщения с утра",
@@ -806,20 +919,20 @@
             "За то, что ты всегда рядом (даже далеко)",
             "За твой характер",
             "За то, как ты говоришь 'спокойной ночи'",
-            "За твои мечты (и что я в них есть)",
+            "За твои мечты",
             "За то, что ты мой",
             "За твою искренность",
             "За то, как ты умеешь слушать",
             "За твои советы",
             "За то, что ты веришь в меня",
             "За твою силу",
-            "За твою слабость (когда ты уставший и милый)",
-            "За твой нос (он классный)",
-            "За то, как ты ешь (вкусно даже смотреть)",
-            "За твои мемы (ты король мемов)",
+            "За твою слабость",
+            "За твой нос",
+            "За то, как ты ешь",
+            "За твои мемы",
             "За то, что ты понимаешь мой юмор",
             "За то, что мы одна команда",
-            "За твои объятия (скоро, совсем скоро)",
+            "За твои объятия",
             "За то, что ты терпеливый",
             "За твои сюрпризы",
             "За то, как ты называешь меня",
@@ -836,7 +949,7 @@
             reasonBox.textContent = randomReason;
         });
 
-        // ==================== НОВАЯ ИГРА: НАЙДИ ПАРУ ====================
+        // ==================== ИГРА: НАЙДИ ПАРУ ====================
         const gameGrid = document.getElementById('gameGrid');
         const gameMessage = document.getElementById('gameMessage');
         const resetBtn = document.getElementById('resetGame');
@@ -859,14 +972,12 @@
         ];
 
         function initGame() {
-            // Создаем пары
             let cardSymbols = [];
             symbols.forEach((symbol, index) => {
                 cardSymbols.push({ symbol, message: messages[index], pairId: index });
                 cardSymbols.push({ symbol, message: messages[index], pairId: index });
             });
             
-            // Перемешиваем
             cardSymbols = cardSymbols.sort(() => Math.random() - 0.5);
             
             cards = cardSymbols.map((card, index) => ({
@@ -901,7 +1012,6 @@
             if (card.flipped || card.matched) return;
             if (flippedCards.length === 2) return;
 
-            // Переворачиваем карту
             card.flipped = true;
             flippedCards.push(index);
             renderBoard();
@@ -917,25 +1027,33 @@
             const card2 = cards[flippedCards[1]];
 
             if (card1.pairId === card2.pairId) {
-                // Нашли пару
                 card1.matched = true;
                 card2.matched = true;
                 matchedPairs++;
                 
-                // Показываем сообщение
                 gameMessage.textContent = card1.message;
                 
                 flippedCards = [];
                 lockBoard = false;
                 renderBoard();
 
-                // Проверяем победу
                 if (matchedPairs === symbols.length) {
                     gameMessage.textContent = '🎉 Ура! Буся нашел все пары! Ты супер! 🎉';
-                    createVictoryHearts();
+                    for (let i = 0; i < 20; i++) {
+                        setTimeout(() => {
+                            const heart = document.createElement('div');
+                            heart.className = 'floating-heart';
+                            heart.innerHTML = '❤️';
+                            heart.style.left = Math.random() * 100 + '%';
+                            heart.style.bottom = '0';
+                            heart.style.fontSize = (Math.random() * 40 + 20) + 'px';
+                            heart.style.animationDuration = Math.random() * 2 + 2 + 's';
+                            document.body.appendChild(heart);
+                            setTimeout(() => heart.remove(), 3000);
+                        }, i * 100);
+                    }
                 }
             } else {
-                // Не пара - переворачиваем обратно
                 setTimeout(() => {
                     card1.flipped = false;
                     card2.flipped = false;
@@ -946,25 +1064,7 @@
             }
         }
 
-        function createVictoryHearts() {
-            for (let i = 0; i < 20; i++) {
-                setTimeout(() => {
-                    const heart = document.createElement('div');
-                    heart.className = 'floating-heart';
-                    heart.innerHTML = '❤️';
-                    heart.style.left = Math.random() * 100 + '%';
-                    heart.style.bottom = '0';
-                    heart.style.fontSize = (Math.random() * 40 + 20) + 'px';
-                    heart.style.animationDuration = Math.random() * 2 + 2 + 's';
-                    document.body.appendChild(heart);
-                    setTimeout(() => heart.remove(), 3000);
-                }, i * 100);
-            }
-        }
-
         resetBtn.addEventListener('click', initGame);
-
-        // Запускаем игру
         initGame();
 
         // ==================== СЛАЙДЕР ====================
@@ -972,8 +1072,21 @@
         const slides = document.querySelectorAll('.slide');
         const prevBtn = document.getElementById('prevSlide');
         const nextBtn = document.getElementById('nextSlide');
-        const dots = document.querySelectorAll('.dot');
+        const dotsContainer = document.getElementById('dots');
         let currentSlide = 0;
+
+        // Создаем точки под слайды
+        slides.forEach((_, index) => {
+            const dot = document.createElement('span');
+            dot.className = `dot ${index === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                updateSlider();
+            });
+            dotsContainer.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
 
         function updateSlider() {
             slider.style.transform = `translateX(-${currentSlide * 100}%)`;
@@ -992,21 +1105,35 @@
             updateSlider();
         });
 
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                currentSlide = index;
-                updateSlider();
-            });
-        });
-
-        // Автопролистывание слайдера
         setInterval(() => {
             currentSlide = (currentSlide + 1) % slides.length;
             updateSlider();
         }, 3000);
 
+        // ==================== ПАСХАЛКА 1: Секретная кнопка ====================
+        const secretButton = document.getElementById('secretButton');
+        secretButton.addEventListener('click', () => {
+            showPopup('Ты нашел секретную кнопку! 🎉 Буся, я тебя очень люблю! ❤️ Ты самый лучший на свете!');
+        });
+
+        // ==================== ПАСХАЛКА 2: Свиток в конце страницы ====================
+        const footer = document.getElementById('footer');
+        let footerTimer;
+
+        window.addEventListener('scroll', () => {
+            const footerPosition = footer.getBoundingClientRect().top;
+            const windowHeight = window.innerHeight;
+
+            if (footerPosition <= windowHeight + 100) {
+                clearTimeout(footerTimer);
+                footerTimer = setTimeout(() => {
+                    showPopup('📜 Ты доскроллил до конца! А это секретное послание: "Буся, ты — мой самый родной человек. Спасибо, что ты есть!" 💕');
+                }, 3000);
+            }
+        });
+
         // ==================== ПЛАВАЮЩИЕ СЕРДЕЧКИ ====================
-        function createFloatingHeart() {
+        setInterval(() => {
             const heart = document.createElement('div');
             heart.className = 'floating-heart';
             heart.innerHTML = '❤️';
@@ -1016,15 +1143,10 @@
             heart.style.animationDuration = Math.random() * 3 + 4 + 's';
             heart.style.opacity = Math.random() * 0.5 + 0.3;
             document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 7000);
+        }, 500);
 
-            setTimeout(() => {
-                heart.remove();
-            }, 7000);
-        }
-
-        setInterval(createFloatingHeart, 500);
-
-        // Маленький футбольный мяч в углу (пасхалка)
+        // Пасхалки-иконки
         const football = document.createElement('div');
         football.style.position = 'fixed';
         football.style.bottom = '10px';
@@ -1044,7 +1166,6 @@
         });
         document.body.appendChild(football);
 
-        // Маленькая корона (пасхалка)
         const crown = document.createElement('div');
         crown.style.position = 'fixed';
         crown.style.bottom = '50px';

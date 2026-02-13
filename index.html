@@ -698,10 +698,64 @@
         </button>
     </div>
     
-    <!-- Аудио вместо YouTube (грузится мгновенно) -->
-  <audio id="bgMusic" loop style="display: none;">
-    <source src="music.mp3" type="audio/mpeg">
-</audio>
+<script>
+    // ==================== МУЗЫКА С АВТОПЛЕЙ ====================
+    const musicToggle = document.getElementById('musicToggle');
+    const musicText = document.getElementById('musicText');
+    const audio = document.getElementById('bgMusic');
+    let isPlaying = false; // Начинаем с выключенной, но сразу пытаемся включить
+
+    // Функция попытки включить музыку
+    function tryPlayMusic() {
+        audio.play()
+            .then(() => {
+                isPlaying = true;
+                musicText.textContent = 'Выключить музыку';
+                musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
+                console.log('Музыка играет');
+            })
+            .catch(error => {
+                console.log('Автоплей заблокирован браузером, ждем действия пользователя');
+                // Оставляем кнопку в состоянии "Включить"
+                musicText.textContent = 'Включить музыку';
+                musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+            });
+    }
+
+    // Пытаемся включить сразу после загрузки страницы
+    window.addEventListener('load', () => {
+        tryPlayMusic();
+    });
+
+    // Также пробуем включить при первом клике в любом месте (если автоплей не сработал)
+    document.body.addEventListener('click', function enableMusic() {
+        if (!isPlaying) {
+            tryPlayMusic();
+        }
+    }, { once: true }); // Сработает только один раз
+
+    // Кнопка ручного управления
+    musicToggle.addEventListener('click', (e) => {
+        e.stopPropagation(); // Чтобы не сработал body клик
+        
+        if (isPlaying) {
+            audio.pause();
+            musicText.textContent = 'Включить музыку';
+            musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+            isPlaying = false;
+        } else {
+            audio.play()
+                .then(() => {
+                    musicText.textContent = 'Выключить музыку';
+                    musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
+                    isPlaying = true;
+                })
+                .catch(err => {
+                    alert('Нажми куда-нибудь на странице, чтобы включить музыку');
+                });
+        }
+    });
+</script>
 
     <!-- ШАПКА -->
     <div class="container">

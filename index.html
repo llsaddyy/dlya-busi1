@@ -26,7 +26,7 @@
             position: relative;
         }
 
-        /* Плавающие сердечки (будут созданы в JS) */
+        /* Плавающие сердечки */
         .floating-heart {
             position: fixed;
             pointer-events: none;
@@ -365,7 +365,7 @@
             justify-content: center;
         }
 
-        /* ИГРА */
+        /* НОВАЯ ИГРА: НАЙДИ ПАРУ */
         .game-section {
             background: #ffe4ec;
             border-radius: 40px;
@@ -376,35 +376,76 @@
         }
 
         .game-container {
-            position: relative;
-            width: 100%;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 30px;
-            overflow: hidden;
-            border: 3px dashed #ffb6c1;
-            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
 
-        #gameCanvas {
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
             width: 100%;
-            height: 100%;
-            background: rgba(255, 240, 245, 0.3);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #ffb6c1, #ff8da1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(255, 107, 139, 0.3);
+            border: 2px solid white;
+            color: white;
         }
 
-        .score-box {
-            font-size: 24px;
+        .card.flipped {
+            background: white;
             color: #ff6b8b;
-            font-weight: 700;
-            margin-top: 15px;
+            transform: scale(0.95);
+            box-shadow: 0 5px 10px rgba(255, 107, 139, 0.5);
+        }
+
+        .card.matched {
+            background: #c8e6c9;
+            color: #2e7d32;
+            cursor: default;
+            opacity: 0.7;
+            transform: scale(0.9);
+            pointer-events: none;
         }
 
         .game-message {
-            font-size: 18px;
+            font-size: 20px;
             color: #6c5b7b;
-            min-height: 40px;
-            margin: 10px 0;
+            min-height: 60px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .game-reset {
+            background: #6c5b7b;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-family: 'Comfortaa', cursive;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #ffb6c1;
+        }
+
+        .game-reset:hover {
+            background: #4a3b55;
+            transform: scale(1.05);
         }
 
         /* СЛАЙДЕР */
@@ -530,18 +571,24 @@
             .main-title { font-size: 48px; }
             .greeting-text { font-size: 16px; }
             .container { padding: 20px 15px; }
+            .game-grid { gap: 8px; }
+            .card { font-size: 30px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Музыка (играет сразу) -->
+    <!-- Музыка -->
     <div class="music-player">
         <button class="music-btn" id="musicToggle">
             <span>🔊</span> <span id="musicText">Выключить музыку</span>
         </button>
     </div>
-    <iframe id="youtubePlayer" width="0" height="0" src="https://www.youtube.com/embed/0i7NnXURZe0?autoplay=1&enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media" style="display: none;"></iframe>
+    
+    <!-- YouTube плеер (скрытый) -->
+    <div style="display: none;">
+        <iframe id="youtubePlayer" width="0" height="0" src="https://www.youtube.com/embed/0i7NnXURZe0?autoplay=1&enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media"></iframe>
+    </div>
 
     <!-- ШАПКА -->
     <div class="container">
@@ -559,7 +606,7 @@
             <div class="greeting-text">
                 «Мой любимый! С 14 февраля. Ты — мой личный Месси (только красивее), мой принц из самого лучшего диснеевского мультика и просто человек, ради которого хочется печь торты в 3 часа ночи. Спасибо, что ты есть. И спасибо, что терпишь мою любовь. Я тебя люблю!»
             </div>
-            <div class="signature">Твоя Буся ❤️</div>
+            <div class="signature">Твой Пупс ❤️</div>
         </div>
 
         <!-- КОНВЕРТ С ВАЛЕНТИНКОЙ -->
@@ -568,7 +615,7 @@
                 <div class="heart-on">💌</div>
                 <div class="valentine-card">
                     <img src="https://i.pinimg.com/736x/9b/dd/a0/9bdda07b6889922dd3ded440008e4c71.jpg" alt="Валентинка">
-                    <p>Для моего Пупса ❤️</p>
+                    <p>Для моего Семенчика ❤️</p>
                 </div>
             </div>
         </div>
@@ -585,21 +632,21 @@
 
         <!-- 100 ПРИЧИН -->
         <div class="reasons-section">
-            <h2 class="section-title">💗 Почему я люблю Бусинку? 💗</h2>
+            <h2 class="section-title">💗 Почему я люблю Бусю? 💗</h2>
             <button class="reasons-btn" id="reasonBtn">Показать причину</button>
             <div class="reason-box" id="reasonBox">
                 Нажми на кнопку, и я скажу, за что люблю тебя ❤️
             </div>
         </div>
 
-        <!-- ИГРА -->
+        <!-- НОВАЯ ИГРА: НАЙДИ ПАРУ -->
         <div class="game-section">
-            <h2 class="section-title">🎮 Лови символы! 🎮</h2>
+            <h2 class="section-title">🎮 Найди пару для Буси! 🎮</h2>
             <div class="game-container">
-                <canvas id="gameCanvas" width="800" height="400"></canvas>
+                <div class="game-grid" id="gameGrid"></div>
+                <div class="game-message" id="gameMessage"></div>
+                <button class="game-reset" id="resetGame">🔄 Новая игра</button>
             </div>
-            <div class="score-box">Счет: <span id="score">0</span></div>
-            <div class="game-message" id="gameMessage"></div>
         </div>
 
         <!-- СЛАЙДЕР С ФОТО -->
@@ -617,7 +664,7 @@
                     </div>
                     <div class="slide">
                         <img src="https://via.placeholder.com/600x400/ff9ebb/ffffff?text=Тут+будет+наше+фото+3" alt="Фото 3">
-                        <div class="slide-caption">Мой любимый человек ❤️</div>
+                        <div class="slide-caption">Мой любимый Буся ❤️</div>
                     </div>
                     <div class="slide">
                         <img src="https://via.placeholder.com/600x400/ffafc0/ffffff?text=Тут+будет+наше+фото+4" alt="Фото 4">
@@ -638,28 +685,52 @@
         <!-- ФУТЕР -->
         <div class="footer">
             <div class="hearts-line">❤️ 🧡 💛 💚 💙 💜 🖤</div>
-            <p>Сделано с любовь для Буси от Пупса 💕 14 февраля</p>
+            <p>Сделано с любовью для Буси от Пупса 💕 14 февраля</p>
         </div>
     </div>
 
     <script>
-        // ==================== МУЗЫКА ====================
+        // ==================== МУЗЫКА (ИСПРАВЛЕНО) ====================
         const musicToggle = document.getElementById('musicToggle');
         const musicText = document.getElementById('musicText');
         const player = document.getElementById('youtubePlayer');
         let isPlaying = true;
 
+        // Пробуем включить автоплей
+        window.addEventListener('load', () => {
+            // YouTube iframe API
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        });
+
+        let ytPlayer;
+        window.onYouTubeIframeAPIReady = function() {
+            ytPlayer = new YT.Player('youtubePlayer', {
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        };
+
+        function onPlayerReady(event) {
+            event.target.playVideo(); // Автоплей
+        }
+
         musicToggle.addEventListener('click', () => {
-            if (isPlaying) {
-                player.src = player.src.replace('autoplay=1', 'autoplay=0');
-                musicText.textContent = 'Включить музыку';
-                musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
-            } else {
-                player.src = player.src.replace('autoplay=0', 'autoplay=1');
-                musicText.textContent = 'Выключить музыку';
-                musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
+            if (ytPlayer) {
+                if (isPlaying) {
+                    ytPlayer.pauseVideo();
+                    musicText.textContent = 'Включить музыку';
+                    musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+                } else {
+                    ytPlayer.playVideo();
+                    musicText.textContent = 'Выключить музыку';
+                    musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
+                }
+                isPlaying = !isPlaying;
             }
-            isPlaying = !isPlaying;
         });
 
         // ==================== КОНВЕРТ ====================
@@ -676,14 +747,14 @@
         const tarotCards = [
             { name: "Влюбленные (The Lovers)", text: "Сегодня ты встретишь свою любовь. Ой, подожди, ты уже встретил. Это я! ❤️" },
             { name: "Шут (The Fool)", text: "Ты дурак, если думаешь, что я тебя не люблю. Люблю бесконечно! 🤪" },
-            { name: "Колесо Фортуны", text: "Тебе сегодня повезет: Буся позвонит первой и скажет что-то очень нежное 🎰" },
+            { name: "Колесо Фортуны", text: "Тебе сегодня повезет: Пупс позвонит первой и скажет что-то очень нежное 🎰" },
             { name: "Императрица", text: "Жди сюрприз. Возможно, вкусный. Очень вкусный. Спойлер: это торт 🍰" },
             { name: "Маг", text: "Ты можешь всё! Даже заставить мое сердце биться чаще одним сообщением ✨" },
             { name: "Жрица", text: "Я знаю секрет. Но не скажу. Хотя... Ты самый лучший! 🤫" },
             { name: "Иерофант", text: "Традиции говорят, что 14 февраля нужно обниматься. Выполняй! 🫂" },
             { name: "Колесница", text: "Ты несешься в мое сердце на всех парах. И уже давно там 🏎️❤️" },
             { name: "Сила", text: "Твоя сила — в твоей нежности. Оставайся таким 💪" },
-            { name: "Отшельник", text: "Пора выходить из тени и идти обниматься с Буськой! 🏃" },
+            { name: "Отшельник", text: "Пора выходить из тени и идти обниматься с Пупсом! 🏃" },
             { name: "Справедливость", text: "По справедливости, сегодня ты получаешь 100500 поцелуев. Я справедливая ⚖️" },
             { name: "Повешенный", text: "Если ты сейчас висишь на турнике — молодец. Если нет — иди ко мне ❤️" },
             { name: "Смерть", text: "Не пугайся! Это к переменам. Например, к тому, что я скоро приеду 💀✨" },
@@ -711,7 +782,7 @@
             "За твою улыбку 😊",
             "За то, что ты терпишь мои капризы",
             "За твои глаза (они бездонные)",
-            "За то, как ты говоришь 'Буся'",
+            "За то, как ты говоришь 'Пупс'",
             "За твои обнимашки на расстоянии",
             "За то, что ты болеешь за Барселону (я всё равно не понимаю, но ради тебя готова)",
             "За то, что ты мой личный Месси",
@@ -723,7 +794,7 @@
             "За то, что ты существуешь",
             "За твои руки (хочу их держать)",
             "За то, что ты мой принц",
-            "За то, как ты говоришь 'люблю'",
+            "За то, как ты читаешь мне сказки",
             "За твою поддержку",
             "За то, что с тобой я чувствую себя особенной",
             "За твой смех (заразительный)",
@@ -765,98 +836,136 @@
             reasonBox.textContent = randomReason;
         });
 
-        // ==================== ИГРА ====================
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreSpan = document.getElementById('score');
+        // ==================== НОВАЯ ИГРА: НАЙДИ ПАРУ ====================
+        const gameGrid = document.getElementById('gameGrid');
         const gameMessage = document.getElementById('gameMessage');
+        const resetBtn = document.getElementById('resetGame');
 
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        const symbols = ['❤️', '⚽', '👑', '🍕', '⭐', '🎂', '💋', '🌸'];
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let lockBoard = false;
 
-        let items = [];
-        let score = 0;
-        const symbols = ['❤️', '⚽', '👑', '🍕'];
+        const messages = [
+            "Буся, ты мое сердечко! ❤️",
+            "Гол! Ты лучший! ⚽",
+            "Мой король 👑",
+            "Поедим вместе? 🍕",
+            "Ты моя звезда ⭐",
+            "Сладенький мой 🎂",
+            "Целую тебя 💋",
+            "Ты как цветочек 🌸"
+        ];
 
-        class GameItem {
-            constructor() {
-                this.symbol = symbols[Math.floor(Math.random() * symbols.length)];
-                this.x = Math.random() * canvas.width;
-                this.y = 0;
-                this.speed = Math.random() * 2 + 1;
-                this.size = 30;
-                this.message = this.getMessage();
-            }
-
-            getMessage() {
-                switch(this.symbol) {
-                    case '❤️': return 'Ты мое сердце! ❤️';
-                    case '⚽': return 'Гол в мои ворота! ⚽';
-                    case '👑': return 'Мой принц/принцесса! 👑';
-                    case '🍕': return 'Поедим? 🍕';
-                    default: return 'Лови!';
-                }
-            }
-
-            update() {
-                this.y += this.speed;
-            }
-
-            draw() {
-                ctx.font = `${this.size}px Arial`;
-                ctx.fillText(this.symbol, this.x, this.y);
-            }
-
-            isClicked(mx, my) {
-                return mx > this.x - this.size/2 && mx < this.x + this.size/2 &&
-                       my > this.y - this.size && my < this.y;
-            }
-        }
-
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            items.forEach((item, index) => {
-                item.update();
-                item.draw();
-                
-                if (item.y > canvas.height + 50) {
-                    items.splice(index, 1);
-                }
+        function initGame() {
+            // Создаем пары
+            let cardSymbols = [];
+            symbols.forEach((symbol, index) => {
+                cardSymbols.push({ symbol, message: messages[index], pairId: index });
+                cardSymbols.push({ symbol, message: messages[index], pairId: index });
             });
-
-            if (Math.random() < 0.02) {
-                items.push(new GameItem());
-            }
-
-            requestAnimationFrame(gameLoop);
+            
+            // Перемешиваем
+            cardSymbols = cardSymbols.sort(() => Math.random() - 0.5);
+            
+            cards = cardSymbols.map((card, index) => ({
+                ...card,
+                id: index,
+                flipped: false,
+                matched: false
+            }));
+            
+            flippedCards = [];
+            matchedPairs = 0;
+            lockBoard = false;
+            renderBoard();
+            gameMessage.textContent = 'Найди все пары для Буси! ✨';
         }
 
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            
-            const mouseX = (e.clientX - rect.left) * scaleX;
-            const mouseY = (e.clientY - rect.top) * scaleY;
+        function renderBoard() {
+            gameGrid.innerHTML = '';
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${card.flipped ? 'flipped' : ''} ${card.matched ? 'matched' : ''}`;
+                cardElement.textContent = card.flipped || card.matched ? card.symbol : '?';
+                cardElement.dataset.index = index;
+                cardElement.addEventListener('click', () => handleCardClick(index));
+                gameGrid.appendChild(cardElement);
+            });
+        }
 
-            for (let i = items.length - 1; i >= 0; i--) {
-                if (items[i].isClicked(mouseX, mouseY)) {
-                    score++;
-                    scoreSpan.textContent = score;
-                    gameMessage.textContent = items[i].message;
-                    items.splice(i, 1);
-                    break;
-                }
+        function handleCardClick(index) {
+            if (lockBoard) return;
+            const card = cards[index];
+            if (card.flipped || card.matched) return;
+            if (flippedCards.length === 2) return;
+
+            // Переворачиваем карту
+            card.flipped = true;
+            flippedCards.push(index);
+            renderBoard();
+
+            if (flippedCards.length === 2) {
+                checkMatch();
             }
-        });
+        }
 
-        window.addEventListener('resize', () => {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-        });
+        function checkMatch() {
+            lockBoard = true;
+            const card1 = cards[flippedCards[0]];
+            const card2 = cards[flippedCards[1]];
 
-        gameLoop();
+            if (card1.pairId === card2.pairId) {
+                // Нашли пару
+                card1.matched = true;
+                card2.matched = true;
+                matchedPairs++;
+                
+                // Показываем сообщение
+                gameMessage.textContent = card1.message;
+                
+                flippedCards = [];
+                lockBoard = false;
+                renderBoard();
+
+                // Проверяем победу
+                if (matchedPairs === symbols.length) {
+                    gameMessage.textContent = '🎉 Ура! Буся нашел все пары! Ты супер! 🎉';
+                    createVictoryHearts();
+                }
+            } else {
+                // Не пара - переворачиваем обратно
+                setTimeout(() => {
+                    card1.flipped = false;
+                    card2.flipped = false;
+                    flippedCards = [];
+                    lockBoard = false;
+                    renderBoard();
+                }, 1000);
+            }
+        }
+
+        function createVictoryHearts() {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'floating-heart';
+                    heart.innerHTML = '❤️';
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.bottom = '0';
+                    heart.style.fontSize = (Math.random() * 40 + 20) + 'px';
+                    heart.style.animationDuration = Math.random() * 2 + 2 + 's';
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), 3000);
+                }, i * 100);
+            }
+        }
+
+        resetBtn.addEventListener('click', initGame);
+
+        // Запускаем игру
+        initGame();
 
         // ==================== СЛАЙДЕР ====================
         const slider = document.getElementById('slider');
@@ -948,7 +1057,7 @@
         crown.addEventListener('mouseover', () => {
             crown.style.opacity = '1';
             crown.style.transform = 'scale(1.3)';
-            crown.innerHTML = '👑 Мой принц/принцесса 👑';
+            crown.innerHTML = '👑 Мой Буся 👑';
             crown.style.fontSize = '16px';
             crown.style.background = 'rgba(255,255,255,0.8)';
             crown.style.padding = '5px 10px';

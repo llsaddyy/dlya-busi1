@@ -302,23 +302,16 @@
             transform: translate(-50%, -70%) scale(1);
         }
 
+        .valentine-card img {
+            width: 100%;
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+
         .valentine-card p {
             color: #ff6b8b;
             font-weight: 600;
-            font-size: 24px;
-            margin: 20px 0;
-        }
-
-        .secret-placeholder {
-            width: 100%;
-            height: 150px;
-            background: linear-gradient(145deg, #ffe4e9, #ffd5e0);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ff6b8b;
-            font-size: 40px;
+            font-size: 18px;
         }
 
         /* ГАДАЛКА */
@@ -523,7 +516,7 @@
             transform: scale(1.05);
         }
 
-        /* СЛАЙДЕР */
+        /* СЛАЙДЕР - увеличенная высота */
         .slider-section {
             margin: 60px 0;
             padding: 20px;
@@ -553,9 +546,10 @@
 
         .slide img {
             width: 100%;
-            height: 500px;
-            object-fit: cover;
+            height: 600px; /* Увеличил высоту */
+            object-fit: contain; /* Изменил на contain чтобы было видно целиком */
             display: block;
+            background: #ffe4ec; /* Фон для пустых мест */
         }
 
         .slider-btn {
@@ -591,6 +585,7 @@
             justify-content: center;
             gap: 10px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .dot {
@@ -607,7 +602,7 @@
             transform: scale(1.3);
         }
 
-        /* ФУТЕР С ПАСХАЛКАМИ */
+        /* ФУТЕР */
         .footer {
             text-align: center;
             padding: 30px;
@@ -638,6 +633,39 @@
             transform: scale(1.1);
         }
 
+        /* Пасхалки в углах - теперь кликабельные */
+        .easter-egg-left {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 30px;
+            opacity: 0.3;
+            z-index: 999;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .easter-egg-left:hover {
+            opacity: 1;
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .easter-egg-right {
+            position: fixed;
+            bottom: 50px;
+            left: 10px;
+            font-size: 25px;
+            opacity: 0.3;
+            z-index: 999;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .easter-egg-right:hover {
+            opacity: 1;
+            transform: scale(1.3);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -651,6 +679,7 @@
             .container { padding: 20px 15px; }
             .game-grid { gap: 8px; }
             .card { font-size: 30px; }
+            .slide img { height: 400px; }
         }
     </style>
 </head>
@@ -662,17 +691,17 @@
         <button class="popup-close" id="closePopup">Закрыть 💕</button>
     </div>
 
-    <!-- Музыка -->
+    <!-- Музыка (теперь аудиофайл) -->
     <div class="music-player">
         <button class="music-btn" id="musicToggle">
             <span>🔊</span> <span id="musicText">Выключить музыку</span>
         </button>
     </div>
     
-    <!-- YouTube плеер (скрытый) -->
-    <div style="display: none;">
-        <iframe id="youtubePlayer" width="0" height="0" src="https://www.youtube.com/embed/0i7NnXURZe0?autoplay=1&enablejsapi=1" frameborder="0" allow="autoplay; encrypted-media"></iframe>
-    </div>
+    <!-- Аудио вместо YouTube (грузится мгновенно) -->
+    <audio id="bgMusic" loop style="display: none;">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
 
     <!-- ШАПКА -->
     <div class="container">
@@ -698,8 +727,8 @@
             <div class="envelope" id="envelope">
                 <div class="heart-on">💌</div>
                 <div class="valentine-card">
-                    <div class="secret-placeholder">❤️</div>
-                    <p>Для моего Семенчика</p>
+                    <img src="https://i.pinimg.com/736x/9b/dd/a0/9bdda07b6889922dd3ded440008e4c71.jpg" alt="Валентинка">
+                    <p>Для моего Семенчика ❤️</p>
                 </div>
             </div>
             <div class="envelope-hint">💕 нажми на конверт 💕</div>
@@ -782,54 +811,45 @@
             <div class="dots" id="dots"></div>
         </div>
 
-        <!-- ФУТЕР С ПАСХАЛКАМИ -->
+        <!-- ФУТЕР -->
         <div class="footer" id="footer">
             <div class="hearts-line">❤️ 🧡 💛 💚 💙 💜 🖤</div>
             <p>Сделано с любовью для Буси от Пупса 💕 14 февраля</p>
-            <!-- ПАСХАЛКА 1: Секретная кнопка -->
+            <!-- ПАСХАЛКА: Секретная кнопка -->
             <div class="secret-link" id="secretButton">не нажимай</div>
         </div>
     </div>
 
+    <!-- Пасхалки в углах (теперь кликабельные) -->
+    <div class="easter-egg-left" id="footballEgg">⚽</div>
+    <div class="easter-egg-right" id="crownEgg">👑</div>
+
     <script>
-        // ==================== МУЗЫКА ====================
+        // ==================== МУЗЫКА (АУДИО) ====================
         const musicToggle = document.getElementById('musicToggle');
         const musicText = document.getElementById('musicText');
-        const player = document.getElementById('youtubePlayer');
+        const audio = document.getElementById('bgMusic');
         let isPlaying = true;
 
-        // YouTube iframe API
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        let ytPlayer;
-        window.onYouTubeIframeAPIReady = function() {
-            ytPlayer = new YT.Player('youtubePlayer', {
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        };
-
-        function onPlayerReady(event) {
-            event.target.playVideo();
-        }
+        // Пытаемся включить автоплей
+        audio.play().catch(() => {
+            // Если автоплей заблокирован, показываем кнопку включения
+            isPlaying = false;
+            musicText.textContent = 'Включить музыку';
+            musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+        });
 
         musicToggle.addEventListener('click', () => {
-            if (ytPlayer) {
-                if (isPlaying) {
-                    ytPlayer.pauseVideo();
-                    musicText.textContent = 'Включить музыку';
-                    musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
-                } else {
-                    ytPlayer.playVideo();
-                    musicText.textContent = 'Выключить музыку';
-                    musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
-                }
-                isPlaying = !isPlaying;
+            if (isPlaying) {
+                audio.pause();
+                musicText.textContent = 'Включить музыку';
+                musicToggle.innerHTML = '<span>🔈</span> <span id="musicText">Включить музыку</span>';
+            } else {
+                audio.play();
+                musicText.textContent = 'Выключить музыку';
+                musicToggle.innerHTML = '<span>🔊</span> <span id="musicText">Выключить музыку</span>';
             }
+            isPlaying = !isPlaying;
         });
 
         // ==================== ПОПАП ====================
@@ -1105,10 +1125,11 @@
             updateSlider();
         });
 
+        // Замедлил автопрокрутку до 5 секунд
         setInterval(() => {
             currentSlide = (currentSlide + 1) % slides.length;
             updateSlider();
-        }, 3000);
+        }, 5000);
 
         // ==================== ПАСХАЛКА 1: Секретная кнопка ====================
         const secretButton = document.getElementById('secretButton');
@@ -1116,20 +1137,16 @@
             showPopup('Ты нашел секретную кнопку! 🎉 Буся, я тебя очень люблю! ❤️ Ты самый лучший на свете!');
         });
 
-        // ==================== ПАСХАЛКА 2: Свиток в конце страницы ====================
-        const footer = document.getElementById('footer');
-        let footerTimer;
+        // ==================== ПАСХАЛКИ В УГЛАХ ====================
+        const footballEgg = document.getElementById('footballEgg');
+        const crownEgg = document.getElementById('crownEgg');
 
-        window.addEventListener('scroll', () => {
-            const footerPosition = footer.getBoundingClientRect().top;
-            const windowHeight = window.innerHeight;
+        footballEgg.addEventListener('click', () => {
+            showPopup('⚽ Буся, ты мой лучший игрок! Забиваешь гол прямо в мое сердце каждый день! ❤️');
+        });
 
-            if (footerPosition <= windowHeight + 100) {
-                clearTimeout(footerTimer);
-                footerTimer = setTimeout(() => {
-                    showPopup('📜 Ты доскроллил до конца! А это секретное послание: "Буся, ты — мой самый родной человек. Спасибо, что ты есть!" 💕');
-                }, 3000);
-            }
+        crownEgg.addEventListener('click', () => {
+            showPopup('👑 Мой король! Ты носишь корону не на голове, а в моем сердце! 👑');
         });
 
         // ==================== ПЛАВАЮЩИЕ СЕРДЕЧКИ ====================
@@ -1145,55 +1162,6 @@
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 7000);
         }, 500);
-
-        // Пасхалки-иконки
-        const football = document.createElement('div');
-        football.style.position = 'fixed';
-        football.style.bottom = '10px';
-        football.style.left = '10px';
-        football.style.fontSize = '30px';
-        football.style.opacity = '0.3';
-        football.style.zIndex = '999';
-        football.style.transition = 'all 0.3s';
-        football.innerHTML = '⚽';
-        football.addEventListener('mouseover', () => {
-            football.style.opacity = '1';
-            football.style.transform = 'rotate(360deg) scale(1.2)';
-        });
-        football.addEventListener('mouseout', () => {
-            football.style.opacity = '0.3';
-            football.style.transform = 'rotate(0deg) scale(1)';
-        });
-        document.body.appendChild(football);
-
-        const crown = document.createElement('div');
-        crown.style.position = 'fixed';
-        crown.style.bottom = '50px';
-        crown.style.left = '10px';
-        crown.style.fontSize = '25px';
-        crown.style.opacity = '0.3';
-        crown.style.zIndex = '999';
-        crown.style.transition = 'all 0.3s';
-        crown.innerHTML = '👑';
-        crown.addEventListener('mouseover', () => {
-            crown.style.opacity = '1';
-            crown.style.transform = 'scale(1.3)';
-            crown.innerHTML = '👑 Мой Буся 👑';
-            crown.style.fontSize = '16px';
-            crown.style.background = 'rgba(255,255,255,0.8)';
-            crown.style.padding = '5px 10px';
-            crown.style.borderRadius = '20px';
-            crown.style.left = '10px';
-        });
-        crown.addEventListener('mouseout', () => {
-            crown.style.opacity = '0.3';
-            crown.style.transform = 'scale(1)';
-            crown.innerHTML = '👑';
-            crown.style.fontSize = '25px';
-            crown.style.background = 'transparent';
-            crown.style.padding = '0';
-        });
-        document.body.appendChild(crown);
     </script>
 </body>
 </html>
